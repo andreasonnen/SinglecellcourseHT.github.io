@@ -19,17 +19,14 @@ ul.task-list li input[type="checkbox"] {
 }
 
 .table-container {
-  overflow-x: auto; /* Enable horizontal scrolling */
-  margin-bottom: 20px; /* Add some margin for visual spacing */
+  margin: 20px auto; /* Center the table-container */
+  width: 100%; /* Ensure the container spans full width */
+  overflow: hidden; /* Remove horizontal scroll */
 }
 
 table {
   width: 100%; /* Ensure the table spans the full width */
   border-collapse: collapse; /* Collapse borders to avoid extra spacing */
-}
-
-thead, tbody {
-  display: block; /* Ensure the thead and tbody can be separately scrolled */
 }
 
 thead {
@@ -39,8 +36,7 @@ thead {
 }
 
 tbody {
-  max-height: 300px; /* Adjust as needed */
-  overflow-y: auto; /* Enable vertical scrolling if necessary */
+  /* No need for vertical scrolling if the table fits the page */
 }
 
 th, td {
