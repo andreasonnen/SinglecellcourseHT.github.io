@@ -68,7 +68,7 @@ c\. Set the "Idents" of the object to the resolution that gives you 5-6 clusters
 ::: callout-note
 T cells differentiate progressing from Naive to Effector cells. (1).
 
-![**Schematic model of T-cell differentiation subsets**](~/Single_cell_course_2025/T_cell_progression.png){fig-align="center" width="213"}
+![**Schematic model of T-cell differentiation subsets**](/Exercises/T_cell_progression.png/T_cell_progression.png){fig-align="center" width="213"}
 
 There are known gene markers that can aid you in identifying the different states(2,3):
 
