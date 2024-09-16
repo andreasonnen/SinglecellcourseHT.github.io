@@ -30,15 +30,42 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .course-overview, .expectations, .examination, .programming-environment {
-            margin-bottom: 20px;
+
+        /* Tab links */
+        .tab {
+            overflow: hidden;
+            background-color: #f1f1f1;
+            border-bottom: 1px solid #ddd;
         }
-        .schedule {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #eaeaea;
-            border-radius: 5px;
+
+        .tab button {
+            background-color: inherit;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
         }
+
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        .tab button.active {
+            background-color: #006699;
+            color: white;
+        }
+
+        /* Tab content */
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+
+        /* Schedule table styling */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -65,196 +92,120 @@
     <p>02 January, 2024</p>
 </header>
 
-<div class="container">
-    <section class="welcome">
-        <h2>Welcome</h2>
-        <p>Welcome to the Applied Single Cell Bioinformatics! We are really excited to have you and hope that we together can learn a lot!</p>
-    </section>
-
-    <section class="course-overview">
-        <h2>Course Overview</h2>
-        <h3>Course Structure</h3>
-        <p>The course is structured in two parts:</p>
-        <ul>
-            <li>The first part of the course will introduce and have you work with various technologies and analyses. While this course mainly focuses on single-cell RNA-sequencing (scRNA-seq) many of the methods/techniques/tools can also be applied to other single cell data.</li>
-            <li>In the second half of the course, you will do group-based project on real single-cell data.</li>
-        </ul>
-
-        <h3>Flipped Classroom</h3>
-        <p>The course is run as a “flipped classroom”, i.e., you prepare from home by reading material, watching lectures, etc. to ensure a larger proportion of the in-class time can be used on applied computational exercises. This means each day looks like this:</p>
-        <ul>
-            <li>Before lunch (9-12): Applied in-person exercises based on the material you have digested from home</li>
-            <li>After lunch (13-17): You prepare for the next day using the material we supply. You are free to do this wherever you like and both alone and in groups.</li>
-        </ul>
-        <p><strong>Please note:</strong> The material will not be covered during the in-person exercises. You have to prepare at home!</p>
-
-        <h3>Material</h3>
-        <p>All material, both for preparation and exercises will be available via DTU Learn.</p>
-        <p><strong>Note:</strong> We intentionally have created material that requires you to seek out and extract information yourself. While this is not abundant in the start of the course, it will become more so throughout the course.</p>
-        <p>Our guidelines often have redundant information (e.g., two reviews that partially overlap, a video and a review partially overlapping), and it is your responsibility to identify and skip redundant content to optimize your learning.</p>
-
-        <h3>Schedule</h3>
-        <p>All in-person exercises will be in building 127, room 112 in the 9.00-12.00 time slot.</p>
-
-        <div class="schedule">
-            <h4>Course Schedule:</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Week</th>
-                        <th>Date</th>
-                        <th>Week Day</th>
-                        <th>9-12</th>
-                        <th>13-17</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>2nd</td>
-                        <td>Tue</td>
-                        <td>Intro</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>3rd</td>
-                        <td>Wed</td>
-                        <td>scRNA-seq background and preprocessing</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>4th</td>
-                        <td>Thu</td>
-                        <td>scRNA-seq Cell type assignment (Integration, Clustering Assignment and Visualization)</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>5th</td>
-                        <td>Fri</td>
-                        <td>scRNA-seq Downstream analysis 2 (Trajectory and RNA velocity)</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>8th</td>
-                        <td>Mon</td>
-                        <td>scRNA-seq Downstream analysis 1 (DA + DE + GSEA, Cell-Cell communication)</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>9th</td>
-                        <td>Tue</td>
-                        <td>Spatial Transcriptomics</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>10th</td>
-                        <td>Wed</td>
-                        <td>Multimodal Analysis</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>11th</td>
-                        <td>Thu</td>
-                        <td>Isoform Analysis + Midway exam</td>
-                        <td>Mandatory Seminar: Real-world single-cell analysis</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>12th</td>
-                        <td>Fri</td>
-                        <td>Project description and approval</td>
-                        <td>group work</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>15th</td>
-                        <td>Mon</td>
-                        <td>group project</td>
-                        <td>group project</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>16th</td>
-                        <td>Tue</td>
-                        <td>group project</td>
-                        <td>group project</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>17th</td>
-                        <td>Wed</td>
-                        <td>group project</td>
-                        <td>group project</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>18th</td>
-                        <td>Thu</td>
-                        <td>group project</td>
-                        <td>group project presentation hand-in</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>19th</td>
-                        <td>Fri</td>
-                        <td>Exam based on presentation</td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <section class="expectations">
-        <h2>Expectations</h2>
-        <p>We expect you to prepare from home using the supplied materials. The material will not be covered during the in-person exercises and most likely you will not understand nor be able to solve the exercises if you have not prepared from home.</p>
-        <p>The course is designed this way since it allows us to create a course where you can digest content at your own speed/preference, and you can get a lot more interaction with teachers/TAs in learning scenarios optimized for better learning.</p>
-    </section>
-
-    <section class="examination">
-        <h2>Examination</h2>
-        <p>The exam consists of 3 part exams:</p>
-        <ol>
-            <li>Thursday in week 2: Individual multiple choice quiz without online aids.</li>
-            <li>Friday in week 2 - Thursday in week 3: Project prepared in groups where all members are responsible for all parts of the project. Active participation in the group work and handing in the project on time are prerequisites for attending the exam.</li>
-            <li>The Friday in week 3: Oral group presentation of the project.</li>
-        </ol>
-        <p>The final grade is based on an overall assessment of all three part exams.</p>
-    </section>
-
-    <section class="programming-environment">
-        <h2>Programming Environment</h2>
-
-        <h3>Prerequisites</h3>
-        <p>For the entire course, we will use R to organize, analyze, and visualize data. This also means we <strong>REQUIRE</strong> that you are already comfortable with programming in R. You do not have time to learn that during this course! If you do not know how to solve basic data manipulation tasks in R (examples listed below), please contact the teacher.</p>
-        <p><strong>Examples of data analysis you need to know how to do in R prior to course start (without looking it up online):</strong></p>
-        <ul>
-            <li>Merge two datasets based on a shared identifier</li>
-            <li>Do a per-group operation of data based on a grouping column</li>
-            <li>Do a per-row or per-column operation without using loops</li>
-            <li>Use ggplot2 to visualize data, e.g., a scatterplot where points are colored by category</li>
-        </ul>
-        <p>If you are not comfortable with this, you will need to learn fast! There are hundreds of good sources for introducing R. A few of them are the R for Data Science book, Modern Statistics for Modern Biology, this Datacamp course, and this Codecademy course.</p>
-
-        <h3>Environment</h3>
-        <p>We will use an RStudio server which already has all R packages and exercise data installed.</p>
-        <p>For this RStudio server, you simply log in via your DTU credentials (password needs to be updated after summer 2022 with multi-factor authentication). You need to type your credentials twice: once for logging into DTU and once for logging into the RStudio server. You can log in <a href="https://rstudio.dtu.dk">here</a>.</p>
-        <p>We suggest you bookmark this page since you will be using it A LOT in this course. If you take other courses that use the bioinformatics RStudio servers, it is worth noticing that the URL contains the course number. This can be useful for checking if you are on the right RStudio server (since packages, software, etc., are distinct on the individual servers).</p>
-
-        <h3>Programs</h3>
-        <p>We will use the Seurat environment as the backbone for our single-cell analysis and supplement with additional R packages when they are better suited or equivalent functionality does not exist within Seurat.</p>
-
-        <h3>Starting Point</h3>
-        <p>This is an applied single-cell analysis course that starts at the point where data have already been quantified. There are many reasons for this that mostly boils down to quantification of single-cell data being fairly straightforward but very computationally heavy (long run times). In summary: Instead of spending a lot of time on that, we chose to focus on more applied and advanced analysis methods.</p>
-    </section>
+<!-- Tabs -->
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'Welcome')" id="defaultOpen">Welcome</button>
+  <button class="tablinks" onclick="openTab(event, 'Schedule')">Course Schedule</button>
 </div>
+
+<!-- Tab content -->
+<div id="Welcome" class="tabcontent">
+    <div class="container">
+        <section class="welcome">
+            <h2>Welcome</h2>
+            <p>Welcome to the Applied Single Cell Bioinformatics! We are really excited to have you and hope that we together can learn a lot!</p>
+        </section>
+
+        <section class="course-overview">
+            <h2>Course Overview</h2>
+            <!-- Course overview content from your current page -->
+        </section>
+
+        <section class="expectations">
+            <h2>Expectations</h2>
+            <!-- Expectations content -->
+        </section>
+
+        <section class="examination">
+            <h2>Examination</h2>
+            <!-- Examination content -->
+        </section>
+
+        <section class="programming-environment">
+            <h2>Programming Environment</h2>
+            <!-- Programming environment content -->
+        </section>
+    </div>
+</div>
+
+<div id="Schedule" class="tabcontent">
+    <div class="container">
+        <h2>Course Schedule Spring 2025</h2>
+
+        <!-- Schedule content -->
+        <h3>Week 1</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Week Day</th>
+                    <th>9-12</th>
+                    <th>13-17</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2nd</td>
+                    <td>Thursday</td>
+                    <td>Intro</td>
+                    <td>Self study (individual or group): scRNA-seq background and preprocessing</td>
+                </tr>
+                <tr>
+                    <td>3rd</td>
+                    <td>Friday</td>
+                    <td>Quality Control and Dimensionality Reduction</td>
+                    <td>Self study (individual or group)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Week 2</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Week Day</th>
+                    <th>9-12</th>
+                    <th>13-17</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>6th</td>
+                    <td>Monday</td>
+                    <td>Data Integration and Cell Type Annotation</td>
+                    <td>Self study (individual or group)</td>
+                </tr>
+                <tr>
+                    <td>7th</td>
+                    <td>Tuesday</td>
+                    <td>Downstream analysis 1: Trajectory Analysis</td>
+                    <td>Self study (individual or group)</td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- Add more weeks as needed -->
+    </div>
+</div>
+
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Open the default tab
+    document.getElementById("defaultOpen").click();
+</script>
 
 </body>
 </html>
