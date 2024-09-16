@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Single cell course 2025 - Day3</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="SC_2025_Exercises_Day3_files/libs/clipboard/clipboard.min.js"></script>
+<script src="SC_2025_Exercises_Day3_files/libs/quarto-html/quarto.js"></script>
+<script src="SC_2025_Exercises_Day3_files/libs/quarto-html/popper.min.js"></script>
+<script src="SC_2025_Exercises_Day3_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="SC_2025_Exercises_Day3_files/libs/quarto-html/anchor.min.js"></script>
+<link href="SC_2025_Exercises_Day3_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="SC_2025_Exercises_Day3_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="SC_2025_Exercises_Day3_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="SC_2025_Exercises_Day3_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="SC_2025_Exercises_Day3_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Single cell course 2025 - Day3</h1>
+<p class="subtitle lead">Data Integration and Cell Type Annotation</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Learning objectives
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><p>Perform integration of cells across conditions to enable meaningful cross-sample comparisons</p></li>
+<li><p>Perform clustering and marker identification workflow with integrated data</p></li>
+<li><p>Identify cell types based on known gene marker expression</p></li>
+<li><p>Identify cell types using a previously annotated dataset as reference</p></li>
+</ul>
+</div>
+</div>
+<section id="data-integration" class="level1">
+<h1>Data Integration</h1>
+<p>Take a look at the UMAP you created yesterday again. But this time, color the cells by timepoint.</p>
+<p>Load needed libraries</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">library</span>(Seurat)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SeuratData)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(harmony)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(multtest)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(metap)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Load your Seurat object. You can either continue working on your Seurat object from yesterday or, if you didn’t manage to finish, load the quality controlled Seurat object we prepared :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>pbmc.MTB <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"pbmc.MTB_day2.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Visualize the UMAP you created coloring the cells by “timepoint”.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(pbmc.MTB, <span class="at">reduction =</span> <span class="st">'umap'</span>, <span class="at">group.by =</span> <span class="st">'timepoint'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="SC_2025_Exercises_Day3_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">DimPlot</span>(pbmc.MTB, <span class="at">reduction =</span> <span class="st">"umap"</span>, <span class="at">split.by =</span> <span class="st">"timepoint"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="SC_2025_Exercises_Day3_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Why should you perform data integration? What problems do you see if you don’t?</li>
+</ul>
+</div>
+</div>
+<p><br>
+As you read in the preparation material, there are different methods to combine and harmonize samples or datasets from different batches. Here, we will explore two different methods. Seurat’s Anchor-based CCA integration method and <a href="https://www.nature.com/articles/s41592-019-0619-0">Harmony</a>.</p>
+<p>Follow Seurat’s Integration Analysis <a href="https://satijalab.org/seurat/articles/seurat5_integration">vigne</a><a href="https://satijalab.org/seurat/articles/integration_introduction.html">tte</a> to perform the following tasks.</p>
+<p><strong>1. Sample integration</strong></p>
+<p>a. Split the dataset into a list of three Seurat objects (UT, 3hMTB and 24hMTB)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pbmc.MTB[[<span class="st">"RNA"</span>]] <span class="ot">&lt;-</span> <span class="fu">split</span>(pbmc.MTB[[<span class="st">"RNA"</span>]], <span class="at">f =</span> pbmc.MTB<span class="sc">$</span>timepoint)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>b. Normalize and identify variable features as done in yesterday’s exercises for each timepoint.</p>
+<p>c. Perform integration using both Seurat’s CCA method and Harmony.</p>
+<p>d. Perform integration.</p>
+<p>To speed up the process, we will work in parallel. Load the library “Future” and set the plan to “multisession”.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(future)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(<span class="st">"multisession"</span>, <span class="at">workers =</span> <span class="dv">4</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">future.globals.maxSize =</span> <span class="dv">8000</span> <span class="sc">*</span> <span class="dv">1024</span><span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>e. Set the future plan back to “sequential” and re-join the split layers</p>
+<p>f. Generate UMAP visualizations based on the newly calculated dimensionality reductions. Ensure that the new UMAPs are assigned distinct names to prevent overwriting the original, unintegrated UMAP. To do this, utilize the <code>reduction</code> and <code>reduction.name</code> arguments within the <em>RunUMAP</em> function.</p>
+<ol start="6" type="1">
+<li>Plot the three UMAPS (Unintegrated, from CCA method and from Harmony and compare the results).</li>
+</ol>
+<div class="callout callout-style-default callout-caution no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><p>Look at the different integration results, which one do you think looks the best? Why?</p></li>
+<li><p>What is important to keep in mind when analyzing integration results? Discuss the trade-off between correcting batch effects and maintaining the integrity of true biological differences.</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="cell-type-annotation" class="level1">
+<h1>Cell Type Annotation</h1>
+<p>With the samples now integrated, the grouping of cells is no longer influenced by the timepoint factor. You can proceed to identify the various cell types present in the PBMC samples across different timepoints.</p>
+<p><strong>1. Cell clustering</strong></p>
+<p>a. Find neighbors and clusters for the new RPCA and Harmony reductions with resolutions 0.3, 0.5 and 0.7.</p>
+<p>b. Visualize the new clustering with the harmony UMAP split by timepoint. Choose the lowest resolution(0.3).</p>
+<div class="callout callout-style-default callout-caution no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Do you have all/same clusters across timepoints in both integrations?</li>
+<li>For cell type annotation, which one will be better to use?</li>
+</ul>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We can see that the harmony reduction introduces a cluster only found in timepoint 24h after stimnulation. This can be due to the gene expression profile changing after stimulation with the bacterium.</p>
+</div>
+</div>
+<p><strong>2. Cluster Optimization</strong></p>
+<p>We will continue working with the integrated object created with the RPCA integration method.</p>
+<p>As mentioned yesterday, there is a useful tool to revise the unsupervised clustering provided by the package <code>Clustree</code>. Have a look into clustree to assess the different clusters at the different resolutions.</p>
+<p>Example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(clustree)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># RNA_snn_res.0.3 to 0.7 correspond to the different clustering resolutions calculated</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">clustree</span>(pbmc.MTB.rpca, <span class="at">prefix =</span> <span class="st">"RNA_snn_res."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Analyse the plot. What resolution is the most optimal? <a href="https://lazappi.github.io/clustree/articles/clustree.html">Clustree</a></li>
+</ul>
+</div>
+</div>
+<p>a. Set “Idents” of the object to the chosen resolution. From now on, grouping (e.g.&nbsp;for plotting) will be done by this identity</p>
+<p><strong>3. Cell Type assignment</strong></p>
+<p>Identify conserved cell type markers &amp; annotate the different cell types using approaches 1 and 2 described in the preparation material.</p>
+<p><em>Approach 1</em></p>
+<p>a. Explore known gene canonical markers.</p>
+<p>Based on the UMAP we have generated, we can visualize expression for genes in each cluster.</p>
+<p>Example: CD14 is a genes typically expressed by monocytes. You can use <em>FeaturePlot</em> to visualize its expression.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Exmample: CD14 and LYZ are two genes that are expressed by monocytes</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">FeaturePlot</span>(pbmc.MTB.rpca, </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">reduction =</span> <span class="st">"umap_rpca"</span>, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">features =</span> <span class="fu">c</span>(<span class="st">"CD14"</span>), </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">order =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">min.cutoff =</span> <span class="st">'q10'</span>, </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">label =</span> <span class="cn">TRUE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Assesing the plot we can say that clusters 4 and 5 correspond to monocytes.</p>
+<div class="callout callout-style-default callout-caution no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>What could be the reason behind monocytes separating into subclusters?</li>
+</ul>
+</div>
+</div>
+<p>Using a ViolinPlot (<em>VlnPlot</em>) is another useful way to observe gene expression throughout the clusters.</p>
+<p>The following gene markers correspond to different cell types. Consult the literature and figure out which cell types they correspond to.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>Celltype_1 <span class="ot">&lt;-</span> <span class="st">"PPBP"</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>Celltype_2 <span class="ot">&lt;-</span> <span class="st">"MS4A1"</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>Celltype_3 <span class="ot">&lt;-</span> <span class="st">"CD8A"</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>Celltype_4 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"IL7R"</span>, <span class="st">"CCR7"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>Celltype_5 <span class="ot">&lt;-</span> <span class="st">"FCER1A"</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>Celltype_6 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"NCR3"</span>, <span class="st">"GNLY"</span>,<span class="st">"NKG7"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>Celltype_7 <span class="ot">&lt;-</span> <span class="st">"CD79A"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>b. Use the gene markers to annotate the clusters.</p>
+<p>c. Identify Conserved Markers for Unannotated Clusters</p>
+<p>Another way to get a clue about the cell types grouping together in a cluster is to examine the cluster’s gene profile through a differential gene expression analysis.</p>
+<ul>
+<li><strong>Example</strong>: For Cluster 7, investigate which genes stand out in this cluster compared to all the other clusters.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cluster7_conserved_markers <span class="ot">&lt;-</span> <span class="fu">FindConservedMarkers</span>(pbmc.MTB.rpca,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">ident.1 =</span> <span class="dv">7</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">grouping.var =</span> <span class="st">"timepoint"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">only.pos =</span> <span class="cn">TRUE</span>,<span class="at">min.pct =</span> <span class="fl">0.25</span>,  <span class="at">min.diff.pct =</span> <span class="fl">0.25</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">logfc.threshold =</span> <span class="fl">0.25</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cluster7_conserved_markers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-caution no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Answer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Why do you use the function <em>FindConservedMarkers</em> and not <em>FindMarkers</em> only?</li>
+</ul>
+</div>
+</div>
+<p>d. What cell do they correspond to? Use the found markers to investigate</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A way to investigate where the genes are expressed is to:</p>
+<ol type="1">
+<li>Go to <a href="https://www.proteinatlas.org/">The Human Protein Atlas</a> website</li>
+<li>Search the gene of interest</li>
+<li>Click on the RNA SINGLE CELL tab</li>
+<li>Use the search bar in your browser to find expression in PBMCs as it is where your data comes from</li>
+</ol>
+</div>
+</div>
+<p>e. Finish identifying the different cell types in your clusters using any of the proposed strategies.</p>
+<p>f. Assign the identified cell types to their respective cluster and save the annotations from approach 1 as “cell_type_manual” in the metadata.</p>
+<p>g. Visualize the cell_type_manual labels in the umap</p>
+<p><em>Approach 2</em></p>
+<p>Use SingleR to identify cell types based on a reference dataset.</p>
+<p>We will be using a pbmc dataset developed by Seurat as reference(1).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the dataset</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>pbmcsca <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"/Users/andson/Desktop/SingleCell_Course/Files/pbmcsca.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li>Use SingleR to annotate the different clusters.</li>
+</ol>
+<ol type="a">
+<li><p>Extract the raw counts from your object</p></li>
+<li><p>Transform the reference Seurat Object to a SCE object like done yesterday.</p></li>
+<li><p>Run SingleR. Use <strong>pbmcsca</strong> as your reference dataset.</p></li>
+</ol>
+<p>You can follow the following <a href="https://biostatsquid.com/singler-tutorial/">tutorial</a>. Focus on section <strong>Run SingleR</strong> and <strong>Inspect the quality of SingleR predictions.</strong></p>
+<p>This step takes around 20 min.</p>
+<ol start="2" type="1">
+<li>Compare the two approaches (manual vs.&nbsp;automatic). Do the labels match?</li>
+</ol>
+<p>Correct any labels if you had annotated the clusters incorrectly!</p>
+<p>Save your annotated object.</p>
+<p>Reference: (1) Ding J, Adiconis X, Simmons SK, Kowalczyk MS, Hession CC, Marjanovic ND, Hughes TK, Wadsworth MH, Burks T, Nguyen LT, Kwon JYH, Barak B, Ge W, Kedaigle AJ, Carroll S, Li S, Hacohen N, Rozenblatt-Rosen O, Shalek AK, Villani AC, Regev A, Levin JZ. Systematic comparison of single-cell and single-nucleus RNA-sequencing methods. Nat Biotechnol. 2020 Jun;38(6):737-746. doi: 10.1038/s41587-020-0465-8. Epub 2020 Apr 6. Erratum in: Nat Biotechnol. 2020 Apr 27;: PMID: 32341560; PMCID: PMC7289686.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
