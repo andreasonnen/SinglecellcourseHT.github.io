@@ -64,35 +64,6 @@
             border: 1px solid #ddd;
             border-top: none;
         }
-
-        /* Schedule table styling */
-        .table-container {
-            overflow-x: auto; /* Enable horizontal scrolling */
-            margin-bottom: 20px; /* Add some margin for visual spacing */
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #006699;
-            color: white;
-        }
-        thead {
-            display: table-header-group;
-        }
-        tbody {
-            display: table-row-group;
-        }
     </style>
 </head>
 <body>
@@ -100,7 +71,7 @@
 <header>
     <h1>Applied Single Cell Bioinformatics</h1>
     <p>Andrea Sonnenholzner, Lars Rønn Olsen & Kristoffer Vitting-Seerup</p>
-    <p>02 January, 2024</p>
+    <p>02 January, 2025</p>
 </header>
 
 <!-- Tabs -->
@@ -114,7 +85,7 @@
     <div class="container">
         <section class="welcome">
             <h2>Welcome</h2>
-            <p>Welcome to the Applied Single Cell Bioinformatics! We are really excited to have you and hope that we together can learn a lot!</p>
+            <p>Welcome to the Applied Single Cell Bioinformatics! We are really excited to have you and hope that together we can learn a lot!</p>
         </section>
 
         <section class="course-overview">
@@ -140,66 +111,8 @@
 </div>
 
 <div id="Schedule" class="tabcontent">
-    <div class="container">
-        <h2>Course Schedule Spring 2025</h2>
-
-        <!-- Schedule content -->
-        <h3>Week 1</h3>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Week Day</th>
-                        <th>9-12</th>
-                        <th>13-17</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2nd</td>
-                        <td>Thursday</td>
-                        <td>Intro</td>
-                        <td>Self study (individual or group): scRNA-seq background and preprocessing</td>
-                    </tr>
-                    <tr>
-                        <td>3rd</td>
-                        <td>Friday</td>
-                        <td>Quality Control and Dimensionality Reduction</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <h3>Week 2</h3>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Week Day</th>
-                        <th>9-12</th>
-                        <th>13-17</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>6th</td>
-                        <td>Monday</td>
-                        <td>Data Integration and Cell Type Annotation</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                    <tr>
-                        <td>7th</td>
-                        <td>Tuesday</td>
-                        <td>Downstream analysis 1: Trajectory Analysis</td>
-                        <td>Self study (individual or group)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <!-- Add more weeks as needed -->
+    <div class="container" id="schedule-content">
+        <!-- Schedule content will be loaded here -->
     </div>
 </div>
 
@@ -216,6 +129,16 @@
         }
         document.getElementById(tabName).style.display = "block";
         evt.currentTarget.className += " active";
+
+        // Load external content for the Schedule tab
+        if (tabName === 'Schedule') {
+            fetch('Course_Schedule.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('schedule-content').innerHTML = data;
+                })
+                .catch(error => console.error('Error loading the schedule:', error));
+        }
     }
 
     // Open the default tab
@@ -224,4 +147,3 @@
 
 </body>
 </html>
-
