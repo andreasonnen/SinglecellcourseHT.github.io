@@ -23,9 +23,15 @@ jobs:
         with:
           quarto-version: '1.5.57'  # specify the Quarto version
 
+      - name: Set working directory
+        run: |
+          mkdir -p Exercises/_site
+        working-directory: Exercises
+
       - name: Render Quarto documents
         run: |
           quarto render Exercises/*.qmd --to html
+        working-directory: Exercises
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -41,4 +47,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./_site
+          publish_dir: ./Exercises/_site
+
