@@ -1,0 +1,321 @@
+---
+title: "Single cell course 2025 - Day3"
+subtitle: "Data Integration and Cell Type Annotation"
+format: html
+---
+
+::: callout-note
+## Learning objectives
+
+-   Perform integration of cells across conditions to enable meaningful cross-sample comparisons
+
+-   Perform clustering and marker identification workflow with integrated data
+
+-   Identify cell types based on known gene marker expression
+
+-   Identify cell types using a previously annotated dataset as reference
+:::
+
+# Data Integration
+
+Take a look at the UMAP you created yesterday again. But this time, color the cells by timepoint.
+
+Load needed libraries
+
+```{r}
+suppressPackageStartupMessages({
+ library(Seurat)
+library(SeuratData)
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+library(harmony)
+library(tidyr)
+library(multtest)
+library(metap)
+library(tibble)
+})
+```
+
+Load your Seurat object. You can either continue working on your Seurat object from yesterday or, if you didn't manage to finish, load the quality controlled Seurat object we prepared :
+
+```{r, results='hide'}
+pbmc.MTB <- readRDS("pbmc.MTB_day2.rds")
+```
+
+Visualize the UMAP you created coloring the cells by "timepoint".
+
+```{r}
+DimPlot(pbmc.MTB, reduction = 'umap', group.by = 'timepoint')
+DimPlot(pbmc.MTB, reduction = "umap", split.by = "timepoint")
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Why should you perform data integration? What problems do you see if you don't?
+:::
+
+\
+As you read in the preparation material, there are different methods to combine and harmonize samples or datasets from different batches. Here, we will explore two different methods. Seurat's Anchor-based CCA integration method and [Harmony](https://www.nature.com/articles/s41592-019-0619-0).
+
+Follow Seurat's Integration Analysis [vigne](https://satijalab.org/seurat/articles/seurat5_integration)[tte](https://satijalab.org/seurat/articles/integration_introduction.html) to perform the following tasks.
+
+**1. Sample integration**
+
+a\. Split the dataset into a list of three Seurat objects (UT, 3hMTB and 24hMTB)
+
+```{r, warning=FALSE, eval=FALSE}
+pbmc.MTB[["RNA"]] <- split(pbmc.MTB[["RNA"]], f = pbmc.MTB$timepoint)
+```
+
+b\. Normalize and identify variable features as done in yesterday's exercises for each timepoint.
+
+```{r, message=FALSE, echo=FALSE}
+
+```
+
+c\. Perform integration using both Seurat's CCA method and Harmony.
+
+d\. Perform integration.
+
+To speed up the process, we will work in parallel. Load the library "Future" and set the plan to "multisession".
+
+```{r}
+library(future)
+plan("multisession", workers = 4)
+options(future.globals.maxSize = 8000 * 1024^2)
+```
+
+```{r, warning=FALSE}
+
+```
+
+e\. Set the future plan back to "sequential" and re-join the split layers
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+plan("sequential")
+
+```
+
+f\. Generate UMAP visualizations based on the newly calculated dimensionality reductions. Ensure that the new UMAPs are assigned distinct names to prevent overwriting the original, unintegrated UMAP. To do this, utilize the `reduction` and `reduction.name` arguments within the *RunUMAP* function.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+#Anchor-based CCA integration (method=CCAIntegration)
+
+```
+
+6.  Plot the three UMAPS (Unintegrated, from CCA method and from Harmony and compare the results).
+
+```{r}
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Look at the different integration results, which one do you think looks the best? Why?
+
+-   What is important to keep in mind when analyzing integration results? Discuss the trade-off between correcting batch effects and maintaining the integrity of true biological differences.
+:::
+
+# Cell Type Annotation
+
+With the samples now integrated, the grouping of cells is no longer influenced by the timepoint factor. You can proceed to identify the various cell types present in the PBMC samples across different timepoints.
+
+**1. Cell clustering**
+
+a\. Find neighbors and clusters for the new RPCA and Harmony reductions with resolutions 0.3, 0.5 and 0.7.
+
+```{r, message=FALSE, warning=FALSE, results='hide'}
+
+```
+
+b\. Visualize the new clustering with the harmony UMAP split by timepoint. Choose the lowest resolution(0.3).
+
+```{r}
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Do you have all/same clusters across timepoints in both integrations?
+-   For cell type annotation, which one will be better to use?
+:::
+
+::: callout-note
+We can see that the harmony reduction introduces a cluster only found in timepoint 24h after stimnulation. This can be due to the gene expression profile changing after stimulation with the bacterium.
+:::
+
+**2. Cluster Optimization**
+
+We will continue working with the integrated object created with the RPCA integration method.
+
+As mentioned yesterday, there is a useful tool to revise the unsupervised clustering provided by the package `Clustree`. Have a look into clustree to assess the different clusters at the different resolutions.
+
+Example:
+
+```{r, eval=FALSE}
+library(clustree)
+# RNA_snn_res.0.3 to 0.7 correspond to the different clustering resolutions calculated
+clustree(pbmc.MTB.rpca, prefix = "RNA_snn_res.")
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Analyse the plot. What resolution is the most optimal? [Clustree](https://lazappi.github.io/clustree/articles/clustree.html)
+:::
+
+a\. Set "Idents" of the object to the chosen resolution. From now on, grouping (e.g. for plotting) will be done by this identity
+
+```{r}
+
+```
+
+**3. Cell Type assignment**
+
+Identify conserved cell type markers & annotate the different cell types using approaches 1 and 2 described in the preparation material.
+
+*Approach 1*
+
+a\. Explore known gene canonical markers.
+
+Based on the UMAP we have generated, we can visualize expression for genes in each cluster.
+
+Example: CD14 is a genes typically expressed by monocytes. You can use *FeaturePlot* to visualize its expression.
+
+```{r, eval=FALSE}
+#Exmample: CD14 and LYZ are two genes that are expressed by monocytes
+FeaturePlot(pbmc.MTB.rpca, 
+            reduction = "umap_rpca", 
+            features = c("CD14"), 
+            order = TRUE,
+            min.cutoff = 'q10', 
+            label = TRUE) 
+```
+
+Assesing the plot we can say that clusters 4 and 5 correspond to monocytes.
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   What could be the reason behind monocytes separating into subclusters?
+:::
+
+Using a ViolinPlot (*VlnPlot*) is another useful way to observe gene expression throughout the clusters.
+
+The following gene markers correspond to different cell types. Consult the literature and figure out which cell types they correspond to.
+
+```{r}
+Celltype_1 <- "PPBP"
+Celltype_2 <- "MS4A1"
+Celltype_3 <- "CD8A"
+Celltype_4 <- c("IL7R", "CCR7")
+Celltype_5 <- "FCER1A"
+Celltype_6 <- c("NCR3", "GNLY","NKG7")
+Celltype_7 <- "CD79A"
+```
+
+b\. Use the gene markers to annotate the clusters.
+
+c\. Identify Conserved Markers for Unannotated Clusters
+
+Another way to get a clue about the cell types grouping together in a cluster is to examine the cluster's gene profile through a differential gene expression analysis.
+
+-   **Example**: For Cluster 7, investigate which genes stand out in this cluster compared to all the other clusters.
+
+```{r, eval=FALSE}
+cluster7_conserved_markers <- FindConservedMarkers(pbmc.MTB.rpca,
+                              ident.1 = 7,
+                              grouping.var = "timepoint",
+                              only.pos = TRUE,min.pct = 0.25,  min.diff.pct = 0.25,
+                      logfc.threshold = 0.25)
+
+head(cluster7_conserved_markers)
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Why do you use the function *FindConservedMarkers* and not *FindMarkers* only?
+:::
+
+d\. What cell do they correspond to? Use the found markers to investigate
+
+::: callout-note
+A way to investigate where the genes are expressed is to:
+
+1.  Go to [The Human Protein Atlas](https://www.proteinatlas.org/) website
+2.  Search the gene of interest
+3.  Click on the RNA SINGLE CELL tab
+4.  Use the search bar in your browser to find expression in PBMCs as it is where your data comes from
+:::
+
+e\. Finish identifying the different cell types in your clusters using any of the proposed strategies.
+
+f\. Assign the identified cell types to their respective cluster and save the annotations from approach 1 as "cell_type_manual" in the metadata.
+
+```{r}
+
+```
+
+g\. Visualize the cell_type_manual labels in the umap
+
+```{r, eval=FALSE}
+
+```
+
+*Approach 2*
+
+Use SingleR to identify cell types based on a reference dataset.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+#Load SingleR library
+library(SingleR)
+```
+
+We will be using a pbmc dataset developed by Seurat as reference(1).
+
+```{r}
+# Load the dataset
+pbmcsca <- readRDS("/Users/andson/Desktop/SingleCell_Course/Files/pbmcsca.rds")
+```
+
+ 1. Use SingleR to annotate the different clusters.
+
+a. Extract the raw counts from your object
+
+b. Transform the reference Seurat Object to a SCE object like done yesterday.
+
+c. Run SingleR. Use **pbmcsca** as your reference dataset.
+
+You can follow the following [tutorial](https://biostatsquid.com/singler-tutorial/). Focus on section **Run SingleR** and **Inspect the quality of SingleR predictions.**
+
+This step takes around 20 min.
+
+```{r}
+
+```
+
+2.  Compare the two approaches (manual vs. automatic). Do the labels match?
+
+```{r}
+
+```
+
+Correct any labels if you had annotated the clusters incorrectly!
+
+```{r}
+
+```
+
+Save your annotated object.
+
+```{r, echo=FALSE, eval=FALSE}
+saveRDS(pbmc.MTB, "pbmc.MTB_day3.rds")
+```
+
+Reference: (1) Ding J, Adiconis X, Simmons SK, Kowalczyk MS, Hession CC, Marjanovic ND, Hughes TK, Wadsworth MH, Burks T, Nguyen LT, Kwon JYH, Barak B, Ge W, Kedaigle AJ, Carroll S, Li S, Hacohen N, Rozenblatt-Rosen O, Shalek AK, Villani AC, Regev A, Levin JZ. Systematic comparison of single-cell and single-nucleus RNA-sequencing methods. Nat Biotechnol. 2020 Jun;38(6):737-746. doi: 10.1038/s41587-020-0465-8. Epub 2020 Apr 6. Erratum in: Nat Biotechnol. 2020 Apr 27;: PMID: 32341560; PMCID: PMC7289686.

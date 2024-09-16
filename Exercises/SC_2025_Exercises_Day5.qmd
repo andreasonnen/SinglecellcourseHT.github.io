@@ -1,0 +1,199 @@
+---
+title: "Single Cell Course 2025 - Day5"
+subtitle: "Downstream Analysis 2"
+format: html
+---
+
+::: callout-note
+## Learning Objectives
+
+-   Analyze cells to investigate if there is altered abundance of cell types after stimulation
+
+-   Utilize DESeq2 to perform pseudobulk differential expression analysis on a specific cell type cluster
+
+-   Map found differentially expressed genes(DEGs) to functional annotations or pathways with gene set enrichment analysis(GSEA)
+
+-   Interpret GSEA results to understand broader biological significance of the DEGs
+
+-   Use CellChat to infer, analyze, and visualize cell-to-cell communication networks
+:::
+
+To load the data you can either continue working on your Seurat object from yesterday or load the Seurat object we prepared:
+
+```{r}
+#Load Seurat object
+pbmc.MTB <- readRDS("~/Single_cell_course_2025/pbmc.MTB_day3.rds")
+```
+
+Load libraries
+
+```{r, warning=FALSE}
+suppressPackageStartupMessages({
+library(Seurat)
+library(SingleCellExperiment)
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+library(tibble)
+library(fgsea)
+})
+```
+
+Investigate if the cell type abundance differs after 3h stimulation using DCATS. Is there a significant difference in cell abundance in any of the clusters across time points (unstimulated and after 3 hours)?
+
+Take a look at the following [vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/DCATS/inst/doc/Intro_to_DCATS.html) for help.
+
+a\. Subset the data to keep only the unstimulated cells and those taken 3h after stimulation.
+
+```{r, warning=FALSE, eval=FALSE}
+pbmc.MTB <- subset(pbmc.MTB, timepoint == c("UT", "3hMTB"))
+```
+
+b\. Update sample names to have more intuituve handles
+
+```{r, eval=FALSE}
+#switch "pbmc.MTB" to your object if you are not using the one provided by us
+pbmc.MTB$timepoint[pbmc.MTB$timepoint == '3hMTB'] <- 'stim'
+pbmc.MTB$timepoint[pbmc.MTB$timepoint == 'UT'] <- 'ctrl'
+
+pbmc.MTB$id <- paste0(pbmc.MTB$timepoint, pbmc.MTB$subject)
+
+sce <- as.SingleCellExperiment(pbmc.MTB)
+
+```
+
+c\. Use DCAT to perform the cell abundance analysis. Estimate the similarity matrix by retrieving the created snn graph from your seurat object
+
+Load the following libraries
+
+```{r}
+suppressPackageStartupMessages({
+library(DCATS)
+library(SeuratData)
+library(tidyverse)
+library(Seurat)
+library(enrichplot)
+library(clusterProfiler)
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+library(tibble)
+})
+```
+
+::: callout-tip
+Since we have a Seurat object, we can estimate the similarity matrix based on the KNN graphs information.
+:::
+
+```{r}
+
+```
+
+```{r}
+
+
+```
+
+```{r}
+
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Is there a significant drop or increase in number of any cell type after stimulation?
+:::
+
+\
+We can perform a differential expression analysis to identify genes that are differentially expressed within a specific cell cluster. In our study, we have samples from individuals in a "healthy" state and samples from the same individuals after their cells were stimulated *in vitro* with the MTB pathogen. Our goal is to determine which genes are most affected by this stimulation in a particular cell type.
+
+To achieve this, we will first subset our data to focus on the desired cell cluster. Next, we will update the cell identities to reflect the variable of comparison: healthy versus stimulated. By comparing gene expression levels between these conditions, we can identify which genes are differentially expressed in response to the MTB stimulation.
+
+2.  Identify genes that are differentially expressed in Monocytes CD14+ 3h after stimulation when compared to the unstimulated cells using a pseudobulk analysis approach with DESeq2.
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Why do you use a pseudobulk approach?
+:::
+
+a.  Perform the analysis, which are the top 20 differentially expressed genes
+
+```{r}
+library(DESeq2)
+```
+
+::: callout-tip
+In order to use the DESeq2 functions you will first need to create a DESeq object:
+
+dds \<- DESeqDataSetFromMatrix(countData = counts_monocytes, colData = colData, design = \~ condition)\
+\
+Think about what the inputs for the different arguments are. <https://www.bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-matrix-input>
+:::
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+In order to have these results in more interpretable terms such as known biological pathways, perform a gene set enrichment analysis.
+
+3.  Use fgsea to perform a gene-set enrichment analysis (the functional class scoring type) on the differential expression results to figure out the biological meaning of the up/down regulated genes in relation to stimulation with MTB. To do this you need to rank the genes by pvalue, but also, sorting so that upregulated genes are at start and downregulated at the other - you can do this combining the sign of the fold change and the p-value by calculating this statistics: `-log10( p-value ) * sign( fold-Change)`.
+
+Gene-sets can be obtained from a variety of places (GO, KEGG, MSigDB, etc). Today you should just use these once we have extracted for the exercise by loading them via:
+
+```{r, eval=FALSE}
+#Load Seurat object
+gsList <- readRDS("/Users/andson/Desktop/SingleCell_Course/Objects/gene_sets.Rds")
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+We see several signaling pathways activated. Let's explore them using cell-cell interaction analysis tools
+
+4.  We see through the GSEA analysis that genes involved in signaling pathways are upregulated, can you find out to which cells these monocytes are communicating with through these signalling pathways? Use ['CellChat'](https://htmlpreview.github.io/?https://github.com/jinworks/CellChat/blob/master/tutorial/CellChat-vignette.html#b-starting-from-a-seurat-object) and the 'secreted signaling' subset of CellChatDB to perform the cell-cell communication analysis.
+
+```{r}
+suppressPackageStartupMessages({
+library(CellChat)
+library(patchwork)
+library(future)
+})
+options(stringsAsFactors = FALSE)
+
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```

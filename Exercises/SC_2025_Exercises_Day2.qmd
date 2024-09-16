@@ -1,0 +1,395 @@
+---
+title: "Single cell course 2025 - Day2"
+subtitle: "Quality Control and Dimnesionality Reduction"
+format: html
+---
+
+::: callout-note
+## Learning objectives
+
+-   Load single cell data into R
+-   Explain the basic structure of a `Seurat` object and extract count data and metadata
+-   Calculate and visualize quality measures
+-   Perform cell filtering based on quality thresholds
+-   Perform normalization
+-   Identify highly variable features
+-   Perform scaling
+-   Perform linear dimensional reduction and visualize data through UMAP plots
+:::
+
+## Background
+
+### Data Description:
+
+The dataset includes Single-cell RNA-sequencing results from 1.3 million peripheral blood mononuclear cells(PBMCs) sourced from 120 individuals. These cells underwent in-vitro stimulation with Mycobacterium tuberculosis (MTB). Sample collection occurred at three different time points: 0 hours, 3 hours, and 24 hours post-stimulation.
+
+For the purpose of this course, we are narrowing our focus to cells from only 8 subjects.
+
+The R package ['Seurat'](https://github.com/satijalab/seurat) is currently the most popular software to do this. The SeuratObject you will be working with is in the files for this course under the name *pbmc.MTB*
+
+To start working with `Seurat` you can load it into your environment like this:
+
+```{r, message=FALSE}
+#| output: false
+library(Seurat)
+```
+
+Other libraries you will need for the exercises:
+
+```{r, message=FALSE, warning=FALSE}
+#Load libraries
+library(data.table)
+library(ggplot2)
+library(dplyr)
+library(BiocSingular)
+library(scDblFinder)
+library(SingleCellExperiment)
+library(scater)
+```
+
+## Exercises
+
+For the following exercises, it is suggested to work with a partner/ in a group so that you can discuss the questions proposed below.
+
+To perform the following exercises please follow [Seurat's - Guided Clustering Tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html).
+
+### 1. Data Exploration
+
+Explore the count data and the metadata in the loaded Seurat object.
+
+Load the SeuratObject containing both the count-matrix but also the meta data.
+
+```{r}
+#Load seurat object
+#pbmc.MTB <- readRDS("/home/projects/22102_single_cell/day2/pbmc.MTB.rds")
+
+#Loading from andrea's computer
+pbmc.MTB <- readRDS("/Users/andson/Desktop/SingleCell_Course/2025 Course/Datasets/pbmc.MTB.rds")
+```
+
+a\. Check what's in the *pbmc.MTB* object, by typing *pbmc.MTB* in the R console. How many features are in there? And how many cells?
+
+```{r}
+
+```
+
+a\. Have a look at the `data.frame` stored at `pbmc.MTB@meta.data`. What information do you have? How many timepoints are there? How many subjects?
+
+::: callout-tip
+## Tip:
+
+Both the '\[\[' and '\$' operator allows you to access the metadata variables. There is a subtle difference here between `$` and `[[]]`. While `$` returns a vector of the column in `@meta.data`, `[[]]` returns a `data.frame`.
+:::
+
+```{r}
+
+```
+
+### 2. Quality Control
+
+Now that you are more familiar with the Seurat Object, you will perform quality control on the dataset. Seurat allows you to easily explore QC metrics and filter cells based on any defined criteria.
+
+::: callout-note
+Remember some of the commonly used QC metrics are:
+
+1.  The number of unique genes detected in each cell.
+
+-   Low-quality cells or empty droplets will often have very few genes
+
+-   Cell doublets or multiplets may exhibit an aberrantly high gene count
+
+2.  The percentage of reads that map to the mitochondrial genome
+
+    -   Low-quality/dying cells often have high amounts of mitochondrial reads
+
+3.  Hemoglobin genes
+
+4.  Ribosomal genes
+:::
+
+a\. Create QC metrics with the above listed metrics. First calculate the percentage of reads that map to mithocondrial counts and hemoglobin genes and add them to the metadata dataframe.
+
+```{r}
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Why do damaged cells have a high relative amount of mitochondrial counts?
+
+-   Why do you check for hemoglobin genes? Remember you are working with a dataset obtained from PBMCs.
+:::
+
+b\. Calculate the percentage of counts coming from ribosomal genes
+
+Are not rRNA (ribosomal RNA) but is mRNA that code for ribosomal proteins. They do not point to specific issues, but it can be good to have a look at their relative abundance. They can have biological relevance (e.g. [Caron et al. 2020](https://www.nature.com/articles/s41598-020-64929-x)).
+
+```{r}
+
+```
+
+c\. Visualize the created QC metrics as violin plots and perform a visual inspection to decide reasonable cut-offs to filter out contaminated/dying & low-quality cells.
+
+```{r}
+
+```
+
+d\. Filter the object based on the calculated QC metrics.
+
+```{r}
+
+```
+
+e\. Plot the average gene-fraction across all cells.
+
+We can also evaluate the relative expression of the genes the that are most highly expressed in our dataset. Some very highly expressed genes might point to a technical cause, and we might consider to remove them. Below you will find a simple function to generate a boxplot of relative counts per gene per cell. Below you will find a function to generate a boxplot of relative counts per gene per cell.
+
+```{r, eval=FALSE}
+par(mar = c(4, 8, 2, 1))
+C <- pbmc.MTB.filtered@assays$RNA@counts
+C <- Matrix::t(Matrix::t(C)/Matrix::colSums(C)) * 100
+most_expressed <- order(apply(C, 1, median), decreasing = T)[20:1]
+
+selected_genes <- t(as.matrix(C[most_expressed, ]))
+
+boxplot(as.matrix(t(C[most_expressed, ])), cex = 0.1, las = 1, xlab = "% total count per cell",
+  col = (scales::hue_pal())(20)[20:1], horizontal = TRUE)
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Which genes constitute most of the UMIs? Filter them out if deemed necessary.
+:::
+
+::: callout-tip
+## Tip:
+
+Look out for MALAT1 and other nuclear lincRNAs. High expression of MALAT1 may indicate contamination or leakage of nuclear RNA into the cytoplasm.As the level of expression of mitochondrial and MALAT1 genes are judged as mainly technical, it can be wise to remove them from the dataset before any further analysis.
+
+OBS: Many researchers choose to remove it, but it can have biological relevance (e.g. [Shaat et al. 2021](https://www.nature.com/articles/s41420-020-00383-y)).
+:::
+
+```{r}
+
+```
+
+::: callout-note
+We want to keep as many good quality cells as possible for our analyses. As seen in the box plotted in c, ribosomal genes are relatively abundant in these dataset and might dominate the expression profiles and mask the detection of other biologically relevant transcripts. Instead of removing them directly, we can regress unwanted sources of variation such as mithocondrial and ribosomal genes later in the pipeline (Scaling step).
+
+If mithocondrial/ribosomal reads present any problems in the clustering later in the pipeline you can come back to these first steps and apply a more strict cut-off/filter them out.
+:::
+
+f\. Compare the initial number of cells to the number of cells after performing quality control.
+
+```{r, eval=FALSE}
+
+```
+
+### 3. Normalization
+
+a\. Perform a log-normalization following Seurat's standard workflow. Important to note that Seurat offers another normalization option (SCTranform) which also scales the data but due to the time constriction and for the purpose of performing every step of the pre processing workflow we will use the standard normalization fucntion.
+
+```{r, message=FALSE}
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Why do you normalize the data? How does the Seurat function do it?
+
+-   Where is the normalized assay stored?
+
+-   Compare the raw data to the normalized data. Did it change?
+:::
+
+### 4. Identification of Highly Variable Features
+
+```{r, message=FALSE}
+#Identifying highly variable features
+
+```
+
+a\. Identify the 2000 most variable features in our dataset.
+
+b\. Plot a scatter plot to visualize the top 10 highly variable features.
+
+```{r, message=FALSE, warning=FALSE}
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Why is this step needed?
+-   Think about your dataset, does it make sense that the shown genes are variable across samples?
+:::
+
+Focusing on these genes in downstream analysis helps to highlight biological signal in single-cell datasets
+
+### 5. Scaling
+
+a\. Scale the data.
+
+::: callout-note
+This is the step in which if deemed necessary we can regress variables that might dominate the expression profiles and mask the detection of other biologically relevant transcripts.
+:::
+
+```{r, message=FALSE}
+#Regress out ribosomal genes
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Why do you perform scaling of the data?
+:::
+
+### 7. **Visualization**
+
+a\. Perform linear dimensionality reduction through a principal component analysis(PCA) on the scaled data
+
+```{r, results='hide'}
+#Linear dimention reduction
+
+```
+
+b\. Determine the dimensionality of the data. Plot an "elbow plot"/scree plot.
+
+```{r}
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   What do principal components explain?
+-   How many principal components are responsible for the 80% of the variability in this dataset?
+:::
+
+```{r}
+
+
+```
+
+c\. Perform clustering of cells setting the "dims" parameter to the number of PCs that explain 75% of the variance in the dataset. Analyze the plotted scree plot. Could you have decided how many dimensions to include in later steps just by visual assessment of the plot?
+
+d\. Determine the K-nearest neighbor graph and determine clusters at resolutions: 0.3, 0.5 and 0.7.
+
+```{r, message=FALSE, results='hide', warning=FALSE}
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   How do the functions *FindNeighbors* and *FindClusters* work? What is the purpose of each?
+:::
+
+d\. Perform a non-linear reduction(UMAP) and plot them using the three different resolutions. Which resolution is the most optimal?
+
+```{r, message=FALSE, warning=FALSE}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   Which resolution is the most optimal?
+:::
+
+::: callout-tip
+The optimal resolution depends on your analysis goals. If you're interested in examining subsets of cells in detail, a higher resolution is preferable. However, for our initial step---cell annotation---we will use the lowest resolution. This approach allows us to separate the major cell groupings without introducing excessive detail within a single cluster.
+
+There is a more objective method to determine the optimal resolution, which we will cover tomorrow.
+:::
+
+e\. Set the chosen resolution as the identity classes of your seurat object.
+
+```{r, eval=FALSE}
+Idents(yourobject) <- "chosenresolution"
+```
+
+**7. Doublets**
+
+::: callout-note
+**Note:** Doublet detection is not strictly a part of the initial QC and usually performed downstream of the QC (after normalization, PCA and even clustering). However, doublet detection is important and not entirely trivial/standardized part of data processing.
+
+The paper from which the data was retrieved states that the doublets in this dataset were previously removed. But it is always wise to double-check the data when working with datasets obtained from publicly available sources.
+:::
+
+a\. Check for doublets using scDblFinder.
+
+::: callout-tip
+**scDblFinder** works with *SingleCellExperiment* obejcts. [`SingleCellExperiment`](https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html)(SCE) is another class for storing single-cell experiment data.
+
+This will be a good opportunity to practice how to convert objects between Seurat and SCE.
+:::
+
+```{r, eval= FALSE, results='hide'}
+#Convert your seurat object to a sce object
+#Create a sample variable for the doublet predictor to use as input
+pbmc.MTB.filtered$sample <- paste0(pbmc.MTB.filtered$subject, "_", pbmc.MTB.filtered$timepoint)
+sce <- as.SingleCellExperiment(pbmc.MTB.filtered)
+#Store the highly variable features as top.var (required to use with scDblFinder)
+top.var <- VariableFeatures(pbmc.MTB.filtered)
+
+```
+
+b\. Visualize the calculated doublet predictions
+
+```{r,eval=FALSE}
+#| echo: false
+set.seed(10010101)
+sce.dbl <- scDblFinder(sce,samples="sample", clusters=colLabels(sce))
+plotUMAP(sce.dbl, colour_by="scDblFinder.score")
+```
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   How does the *scDblFinder* work?
+-   What percentage of the dataset was deemed as doublets?
+:::
+
+```{r, eval=FALSE}
+
+```
+
+c\. Analyze the UMAP created in task 7d. Are there cells that are shared beteen/are in more than one of the formed "clusters"? Can these be doublets?
+
+```{r, eval=FALSE}
+
+```
+
+Lastly, save your Seurat object for the day as we will continue working with it tomorrow.
+
+```{r, echo=FALSE, eval=FALSE}
+#| echo: false
+saveRDS(pbmc.MTB.filtered, "pbmc.MTB_day2.rds")
+```
+
+::: {.callout-caution appearance="simple" icon="false"}
+Before you leave:
+
+Make sure you know where the following are stored/how to access them in your object:
+
+1.  Raw counts & Metadata
+2.  Normalized Data
+3.  Scaled Data
+4.  Variable genes
+5.  Graphs used for clustering
+6.  PCA & UMAP
+:::

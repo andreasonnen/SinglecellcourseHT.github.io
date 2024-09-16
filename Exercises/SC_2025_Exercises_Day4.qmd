@@ -1,0 +1,194 @@
+---
+title: "Single Cell Course 2025 - Day4"
+subtitle: "Downstream Analysis 1"
+format: html
+---
+
+::: callout-note
+## Learning Objectives
+
+-   Perform trajectory analysis using Slingshot and TSCAN for pseudotime ordering.
+
+-   Identify genes showing continuous changes over pseudotime
+:::
+
+Today, we will follow T cells behavior after stimulation with MTB. Upon antigen stimulation, naïve T cells differentiate into CD4^+^ helper and CD8^+^ cytotoxic effector and memory cells, mediating direct killing, diverse immune regulatory function, and long-term protection (1). By performing an analysis on the trajectory these cells follow we can discover genes that change along the trajectory.
+
+**0. Preparation**
+
+a\. Load libraries
+
+```{r, warning=FALSE}
+suppressPackageStartupMessages({
+  library(slingshot)
+  library(Seurat)
+  library(SingleCellExperiment)
+  library(tradeSeq)
+  library(dplyr)
+  library(scater)
+
+})
+```
+
+b\. To load the data you can either continue working on your Seurat object from yesterday or load the Seurat object we prepared:
+
+```{r}
+#Load Seurat object
+pbmc.MTB <- readRDS("~/Single_cell_course_2025/pbmc.MTB_day3.rds")
+```
+
+**1. Subsetting**
+
+a\. Use the cell annotation obtained using approach 1 (aka the "cell_type_manual" column) to subset "CD8+ T cells". Subset the dataset so that you only have CD8+ T cells from timepoint 24hMTB.
+
+```{r}
+
+```
+
+b\. Since any subsetting will impact the most variable features in your new dataset, you need to rerun the standard Seurat workflow on it (From FindVariableFeatures to RunUMAP)
+
+```{r, results='hide', eval=FALSE}
+#Remove layers
+CD8T@assays$RNA@layers$scale.data.UT <- NULL
+CD8T@assays$RNA@layers$scale.data.3hMTB <- NULL
+CD8T@assays$RNA@layers$scale.data.24hMTB <- NULL
+CD8T@assays$RNA@layers$scale.data<- NULL
+
+#remove reductions
+CD8T@reductions <- list()
+
+#Rerun Seurat's standard workflow on the subset object:
+
+
+
+```
+
+c\. Set the "Idents" of the object to the resolution that gives you 5-6 clusters. Explore the different clusters using the following listed gene markers through visualizations such as *FeaturePlot* or *VlnPlot* .
+
+::: callout-note
+T cells differentiate progressing from Naive to Effector cells. (1).
+
+![**Schematic model of T-cell differentiation subsets**](~/Single_cell_course_2025/T_cell_progression.png){fig-align="center" width="213"}
+
+There are known gene markers that can aid you in identifying the different states(2,3):
+
+Naive T cells : CCR7, SELL, CD27, CD28
+
+Central memory CD8+ T: IL7R
+
+Activated T cells: CD69, TNFRSF4
+
+Regulatory T cells: IL2R, CCR7
+
+Terminal Effector T cells: GNLY, GZMH, ZEB2, GZMB
+:::
+
+```{r}
+
+
+```
+
+**2. Trajectory analysis**
+
+Before you begin the exercises,
+
+::: {.callout-caution icon="false"}
+## Answer
+
+-   What do we mean by pseudotime in trajectory analysis?
+
+-   Can you run a developmental trajectory analysis on any dataset? For what type of analysis is it useful?
+:::
+
+a\. Utilize Slingshot [vignette](https://nbisweden.github.io/workshop-archive/workshop-scRNAseq/2020-01-27/labs/compiled/slingshot/slingshot.html#basic_processing_with_seurat_pipeline) to perform trajectory inference. Start from the *#Save the objects as separate matrices for input in slingshot in the* **Basic processing with Seurat pipeline** section.
+
+Select the starting cluster based on your cell annotation.
+
+::: callout-tip
+Hint: How do T cells differentiate? Which cluster can be the starting cluster? 
+:::
+
+::: callout-important
+There are some updates compared to the vignette (the object types returned) meaning you need to apply the function `as.SlingshotDataSet()` to the object created by `getLineages` before you can plot it using the `lines()` function.
+:::
+
+```{r}
+#CD8T
+
+
+# Run default Slingshot lineage identification
+
+```
+
+b\. Visualize the trajectories: plot the lineages
+
+```{r}
+# Plot the lineages
+
+```
+
+Slingshot does not know where the trajectory should start nor end, specify these clusters based on prior knowledge of Tcell differntiation
+
+```{r}
+
+
+```
+
+```{r}
+
+```
+
+c\. Find differentially expressed genes between the branches using tradeseq ([vignette](https://bioconductor.org/packages/devel/bioc/vignettes/tradeSeq/inst/doc/tradeSeq.html#fit-negative-binomial-model)). Use the curves you get from slingshot (via `getCurves()`). You can extract the counts from the Seurat object as follows:
+
+```{r}
+
+```
+
+::: callout-tip
+Hint:
+
+tradeSeq fits a negative binomial generalized additive model (NB-GAM)
+
+Do not forget to adjust the input to the different tradeSeq functions accordingly. How many genes do you have in your count matrix?
+:::
+
+```{r}
+
+```
+
+GZMB, which stands for Granzyme B, is primarily expressed by cytotoxic T lymphocytes, so it follows the biology that it would be expressed in more differentiated T cells.
+
+An alternative approach to manually setting the starting cluster to perform the trajectory analysis is to use TSCAN algorithm to reconstruct the trajectory
+
+If you have time: 
+
+e\. Use TSCAN to obtain pseudotime ordering and perform trajectory analysis([Vignette)](https://bioconductor.org/books/3.16/OSCA.advanced/trajectory-analysis.html). Compare the results obtained in a) to those obtained using TSCAN to define the starting cluster.
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+Finally, save your progress.
+
+```{r, echo=FALSE}
+saveRDS(pbmc.MTB, "pbmc.MTB_day4.rds")
+```
+
+Citations:
+
+1.  Sun, L., Su, Y., Jiao, A. *et al.* T cells in health and disease. *Sig Transduct Target Ther* **8**, 235 (2023). https://doi.org/10.1038/s41392-023-01471-y
+2.  Teteloshvili, N. (2016). The role of microRNAs in T cell activation and ageing. \[Thesis fully internal (DIV), University of Groningen\]. University of Groningen.
+3.  Jin, W., Yang, Q., Peng, Y. *et al.* Single-cell RNA-Seq reveals transcriptional heterogeneity and immune subtypes associated with disease activity in human myasthenia gravis. *Cell Discov* **7**, 85 (2021). https://doi.org/10.1038/s41421-021-00314-w
+4.  Pratt, C. (n.d.). *A guide to naïve T cell markers*. Biocompare. Retrieved September 6, 2024, from <https://www.biocompare.com/Editorial-Articles/597618-A-Guide-to-Naive-T-Cell-Markers/>
