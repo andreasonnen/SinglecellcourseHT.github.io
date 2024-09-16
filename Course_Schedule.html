@@ -20,19 +20,25 @@ ul.task-list li input[type="checkbox"] {
 
 .table-container {
   overflow-x: auto; /* Enable horizontal scrolling */
+  margin-bottom: 20px; /* Add some margin for visual spacing */
 }
 
 table {
   width: 100%; /* Ensure the table spans the full width */
-  border-collapse: collapse; /* Ensure borders collapse to avoid extra spacing */
+  border-collapse: collapse; /* Collapse borders to avoid extra spacing */
+}
+
+thead, tbody {
+  display: block; /* Ensure the thead and tbody can be separately scrolled */
 }
 
 thead {
-  display: table-header-group; /* Ensure header is fixed */
+  background-color: #f2f2f2; /* Background color for the header */
+  position: sticky;
+  top: 0; /* Stick the header to the top */
 }
 
 tbody {
-  display: block; /* Ensure the body can be scrolled */
   max-height: 300px; /* Adjust as needed */
   overflow-y: auto; /* Enable vertical scrolling if necessary */
 }
@@ -40,21 +46,17 @@ tbody {
 th, td {
   padding: 8px; /* Add padding for readability */
   border: 1px solid #ddd; /* Add borders for visibility */
+  text-align: left; /* Align text to the left */
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9; /* Alternate row color for readability */
+}
+
+tr:nth-child(odd) {
+  background-color: #ffffff; /* Alternate row color for readability */
 }
 </style>
-
-<script src="Course_Schedule_files/libs/clipboard/clipboard.min.js"></script>
-<script src="Course_Schedule_files/libs/quarto-html/quarto.js"></script>
-<script src="Course_Schedule_files/libs/quarto-html/popper.min.js"></script>
-<script src="Course_Schedule_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="Course_Schedule_files/libs/quarto-html/anchor.min.js"></script>
-<link href="Course_Schedule_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="Course_Schedule_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="Course_Schedule_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="Course_Schedule_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="Course_Schedule_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-
-<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="fullcontent">
@@ -168,13 +170,6 @@ th, td {
 </section>
 
 </main>
-<!-- /main column -->
-
-<script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  // JavaScript code remains the same
-});
-</script>
 </div> <!-- /content -->
 
 </body>
